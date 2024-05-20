@@ -4,7 +4,7 @@ import itertools
 db = mysql.connector.connect(
     host='localhost',
     user='root',
-    password='1307',
+    password='cdac',
     database="books"
 )
 

@@ -13,7 +13,7 @@ def get_db_connection():
     return mysql.connector.connect(
         host='localhost',
         user='root',
-        password='1307',
+        password='cdac',
         database="books"
     )
 
@@ -109,7 +109,7 @@ def LoggedOut_Clicked():
     st.session_state['loggedIn'] = False
     
 def show_logout_page():
-    loginSection.empty()
+    loginSection.empty();
     with logOutSection:
         st.button ("Log Out", key="logout", on_click=LoggedOut_Clicked)
 

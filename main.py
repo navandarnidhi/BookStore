@@ -67,10 +67,8 @@ def show_main_page():
         with menu:
             
             st.subheader('select the Book you want to order') 
-
+            
             col1, col2, col3 = st.columns(3)
-
-            col1, col2, col3,col4,col5, col6,col7 = st.columns(7)
             col1.image('atomichabit.jpeg')
             col1.text("Atomic Habits")
             if col1.checkbox(label ='Order the book just at 150',key =1):
@@ -98,65 +96,7 @@ def show_main_page():
                 book_list[2] = 'Rich Dad Poor Dad'
                 qty_list[2] = int(c_richdad)
                 amt_list[2] = int(c_richdad)*150              
-            
-            col4, col5, col6 = st.columns(3)
-
-            col4.image('bhagvat gita.jpeg')
-            col4.text("Bhagavat-Gita")
-            if col4.checkbox('Order the book @ ₹200',key =4):
-                col4.text('Enter QTY. -')
-                c_bhagvatgita = col4.number_input(label="", min_value=1, key = 99)
-                book_list[3] = 'Bhagavat-Gita'
-                qty_list[3] = int(c_bhagvatgita)
-                amt_list[3] = int(c_bhagvatgita)*200   
-
-            col5.image('harry potter.jpeg')
-            col5.text("Harry Potter")
-            if col5.checkbox('Order the book @ ₹160',key =5):
-                col5.text('Enter QTY. -')
-                c_harrypotter = col5.number_input(label="", min_value=1, key = 59)
-                book_list[4] = 'Harry Potter'
-                qty_list[4] = int(c_harrypotter)
-                amt_list[4] = int(c_harrypotter)*160
-            
-            col6.image('intelligent investor.jpeg')
-            col6.text("Intelligent Investor")
-            if col6.checkbox('Order the book @ ₹120',key =6):
-                col6.text('Enter QTY. -')
-                c_investor = col6.number_input(label="", min_value=1, key = 49)
-                book_list[5] = 'Intelligent Investor'
-                qty_list[5] = int(c_investor)
-                amt_list[5] = int(c_investor)*120
-
-            col7,col8,col9 = st.columns(3)
-
-            col7.image('5amclub.jpeg')
-            col7.text("The 5 am CLUB")
-            if col7.checkbox('Order the book @ ₹160',key =6):
-                col7.text('Enter QTY. -')
-                c_5amclub = col7.number_input(label="", min_value=1, key = 29)
-                book_list[6] = 'The 5 am CLUB'
-                qty_list[6] = int(c_5amclub)
-                amt_list[6] = int(c_5amclub)*160  
-
-            col8.image('5amclub.jpeg')
-            col8.text("The 5 am CLUB")
-            if col7.checkbox('Order the book @ ₹160',key =6):
-                col7.text('Enter QTY. -')
-                c_5amclub = col7.number_input(label="", min_value=1, key = 19)
-                book_list[6] = 'The 5 am CLUB'
-                qty_list[6] = int(c_5amclub)
-                amt_list[6] = int(c_5amclub)*160
-            
-            col9.image('5amclub.jpeg')
-            col9.text("The 5 am CLUB")
-            if col7.checkbox('Order the book @ ₹160',key =6):
-                col7.text('Enter QTY. -')
-                c_5amclub = col7.number_input(label="", min_value=1, key = 9)
-                book_list[6] = 'The 5 am CLUB'
-                qty_list[6] = int(c_5amclub)
-                amt_list[6] = int(c_5amclub)*160
-
+              
             with cart:
                 hide_table_row_index = """
                 <style>
@@ -189,13 +129,13 @@ def show_main_page():
             with myaccount:
                 st.header('Update your details here')
                 st.subheader("Enter updated email")
-                up_email = st.text_input(label="", value = str(st.session_state['details'][4]))
+                up_email = st.text_input(label="Updated Email", value = str(st.session_state['details'][4]),key="email")
                 st.subheader("Enter updated name")
-                up_name = st.text_input(label="", value=str(st.session_state['details'][1]))
+                up_name = st.text_input(label="Updated Name", value=str(st.session_state['details'][1]),key="name")
                 st.subheader("Enter updated address")
-                up_address = st.text_input(label="", value=str(st.session_state['details'][2]))
+                up_address = st.text_input(label="Updated Address", value=str(st.session_state['details'][2]),key="address")
                 st.subheader("Enter updated phone number")
-                up_number = st.text_input(label="", value=str(st.session_state['details'][3]))
+                up_number = st.text_input(label="Updated Phone Number", value=str(st.session_state['details'][3]),key="phone")
                 
                 st.button('Update User Details', on_click = update_user_details , args=(st.session_state['details'][0], up_email, up_name, up_address, up_number))
 
