@@ -17,9 +17,6 @@ def get_db_connection():
         database="books"
     )
 
-# if st.session_state.get('role') == 'admin':
-#          add_book_tab = st.tabs(['Add Book'])
-
 def user_data_table():
     df = pd.DataFrame(get_user_data())
     return df
@@ -36,14 +33,8 @@ def add_book_to_db(title, author, price, stock):
     except mysql.connector.Error as err:
         st.error(f"Error: {err}")
     finally:
-        cursor.close()
+        # cursor.close()
         conn.close()
-
-# def add_book(title, author, price, stock):
-#     if title and author and price and stock:
-#         add_book_to_db(title, author, price, stock)
-#     else:
-#         st.error("Please provide all the required details: title, author, price and stock.")
 
 def add_book(title, author, price, stock):
     st.write(f"Debug: title={title}, author={author}, price={price}, stock={stock}")
@@ -54,7 +45,7 @@ def add_book(title, author, price, stock):
         # stock = float(stock)
         add_book_to_db(title, author, price, stock)
     else:
-        st.error("Please provide all the required details: title, author, price, and stock.")
+        st.error("Please provide all the required details: title, author, price, stock and image_url.")
 
 def show_main_page():
     with mainSection:
@@ -100,7 +91,6 @@ def show_main_page():
             st.table(order_df)    
             st.subheader('Select the order id you want to get information of')
             ode_id = st.number_input(label="", min_value=1 )
-            # st.button("Get Item Detail ", on_click=get_orderitem_detail_ad, args=(ode_id))
             orderitem_pd = pd.DataFrame(get_orderitem_detail(ode_id))
             st.table(orderitem_pd)
 
@@ -116,11 +106,6 @@ def show_logout_page():
 
 
 def LoggedIn_Clicked(email_id, password):
-    # if email_id == 'admin' and password == 'admin':
-    #     st.session_state['loggedIn'] = True
-    # else:
-    #     st.session_state['loggedIn'] = False;
-    #     st.error("Invalid user name or password")
 
     if email_id == 'admin' and password == 'admin':
         st.session_state['loggedIn'] = True
@@ -144,7 +129,6 @@ def show_login_page():
 
 with headerSection:
     st.title("Online Book Order System  - Admin Login ")
-    #first run will have nothing in session_state
     if 'loggedIn' not in st.session_state:
         st.session_state['loggedIn'] = False
         show_login_page() 

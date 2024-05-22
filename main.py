@@ -1,7 +1,15 @@
-import streamlit as st 
-from userdata import login, signup, get_details, place_order, update_details, update_password, delete_user
-import pandas as pd 
-import time 
+import streamlit as st
+import streamlit as st
+import userdata
+import pandas as pd
+import time
+
+st.session_state.setdefault('book_list', [])
+st.session_state.setdefault('qty_list', [])
+st.session_state.setdefault('amt_list', [])
+st.session_state.setdefault('loggedIn', False)
+st.session_state.setdefault('checkout', False)
+
 if st.session_state.get('role') == 'admin':
  from admin_login import add_book, title, author, stock, price
 
@@ -27,7 +35,7 @@ cart = pd.DataFrame(order)
 
 
 def order_pressed(user_id, total_amt, paymentmethod ,food_list, qty_list):
-    if place_order(user_id, total_amt, paymentmethod, food_list, qty_list):
+    if userdata.place_order(user_id, total_amt, paymentmethod, food_list, qty_list):
         st.session_state['checkout'] = True
         st.session_state['loggedIn'] = False
 
@@ -42,7 +50,7 @@ def show_checkout_page():
         st.subheader(f"and our rider will contact you on = {st.session_state['details'][3]}")
         
 def update_user_details(user_id, email, name ,address, number):
-    if update_details(user_id, email, name ,address, number):
+    if userdata.update_details(user_id, email, name ,address, number):
         st.info("User Information Updated Successfully, you will be logged out now")
         LoggedOut_Clicked()
     else:
@@ -50,7 +58,7 @@ def update_user_details(user_id, email, name ,address, number):
 
 
 def update_user_password(user_id, password):
-    if update_password(user_id, password):
+    if userdata.update_password(user_id, password):
         st.info("Password updated successfully, you will be logged out now")
         LoggedOut_Clicked()
     else:
@@ -58,44 +66,32 @@ def update_user_password(user_id, password):
     
 
 def show_main_page():
-    with mainSection:
-        st.header(f" Welcome {st.session_state['details'][1]} ")
-        
-        
-        menu, cart, myaccount = st.tabs(['Menu', 'Cart', 'My Account'])
-        
-        with menu:
+    menu, cart, myaccount = st.tabs(['Menu', 'Cart', 'My Account'])
+    total_sum = 0
+    with menu:
+            books = userdata.get_books_from_db()
+
+            st.subheader("Available Books")
             
-            st.subheader('select the Book you want to order') 
+            if books and isinstance(books, list):
+                for i, book in enumerate(books):
+                    col1, col2 = st.columns([3, 1])
+                    with col1:
+                        st.text(f"Title: {book[0]}")
+                        st.text(f"Author: {book[1]}")
+                        st.text(f"Price: ₹{book[2]}")
+                    with col2:
+                        if st.checkbox(f'Add {book[0]} to cart', key=f'order_{i}'):
+                          qty = st.number_input(f"Enter Qty for {book[0]}", min_value=1, key=f'qty_{i}')
+                          if qty > 0:
+                            st.session_state['book_list'].append(book[0])
+                            st.session_state['qty_list'].append(qty)
+                            amt = qty * book[2]
+                            st.session_state['amt_list'].append(amt)
+                            total_sum += amt
+            else:
+                st.warning("No valid books found in the database")
             
-            col1, col2, col3 = st.columns(3)
-            col1.image('atomichabit.jpeg')
-            col1.text("Atomic Habits")
-            if col1.checkbox(label ='Order the book just at 150',key =1):
-                col1.text('Enter QTY. -')
-                c_atomic = col1.number_input(label="", min_value=1, key = 79)
-                book_list[0] = 'Atomic Habits'
-                qty_list[0] = int(c_atomic)
-                amt_list[0] = int(c_atomic)*150
-                      
-            col2.image('ikigai.jpeg')
-            col2.text("IKIGAI")
-            if col2.checkbox('Order ikigai at 140',key =2):
-                col2.text('Enter QTY. -')
-                c_ikigai = col2.number_input(label="", min_value=1, key = 89)
-                
-                book_list[1] = 'ikigai'
-                qty_list[1] = int(c_ikigai)
-                amt_list[1] = int(c_ikigai)*140         
-                       
-            col3.image('richdad.jpeg')
-            col3.text("Rich Dad Poor Dad")
-            if col3.checkbox('Order the book @ ₹150',key =3):
-                col3.text('Enter QTY. -')
-                c_richdad = col3.number_input(label="", min_value=1, key = 69)
-                book_list[2] = 'Rich Dad Poor Dad'
-                qty_list[2] = int(c_richdad)
-                amt_list[2] = int(c_richdad)*150              
               
             with cart:
                 hide_table_row_index = """
@@ -107,24 +103,20 @@ def show_main_page():
                 st.markdown(hide_table_row_index, unsafe_allow_html=True)
                 
                 order = {
-                        'book Name':book_list,
-                        'Qty' : qty_list,
-                        'Amount':amt_list
+                        'Book Name': st.session_state['book_list'],
+                        'Qty': st.session_state['qty_list'],
+                        'Amount': st.session_state['amt_list']
                     }
                 
                 cart = pd.DataFrame(order)
                 cart_final = cart.dropna()
                 cart_final['Qty'].astype(int)
                 st.table(cart_final)
-                total_amt = [ amt for amt in amt_list if amt!=None]
-                total_item = [book for book in book_list if book !=None]
-                total_qty = [qty for qty in qty_list if qty!=None]
-                total_sum = sum(total_amt)
                 st.subheader("Your Total Amout to be paid" + ' --  Rs.'+ str(total_sum) )
                 
                 payment = st.selectbox('How would you like to Pay',('Cash','UPI', 'Net Banking', 'Credit Card', 'Debit Card'))
                 
-                st.button ("Order Now", on_click=order_pressed, args= (st.session_state['details'][0], total_sum, payment ,total_item, total_qty))
+                st.button ("Order Now", on_click=order_pressed, args= (st.session_state['details'][0], total_sum, payment ,st.session_state['book_list'], st.session_state['qty_list']))
             
             with myaccount:
                 st.header('Update your details here')
@@ -158,7 +150,7 @@ def show_main_page():
                  st.success("book added Successfuly")
 
 def delete_user_show(urd_id):
-    delete_user(urd_id)
+    userdata.delete_user(urd_id)
     LoggedOut_Clicked()
     st.success("Account Deleted Successfuly")
 
@@ -173,11 +165,10 @@ def show_logout_page():
     with logOutSection:
         st.button ("Log Out", key="logout", on_click=LoggedOut_Clicked)
         
-
 def LoggedIn_Clicked(email_id, password):
-    if login(email_id, password):
+    if userdata.login(email_id, password):
         st.session_state['loggedIn'] = True
-        st.session_state['details'] = get_details(email_id)
+        st.session_state['details'] = userdata.get_details(email_id)
     else:
         st.session_state['loggedIn'] = False
         st.session_state['details'] = None
@@ -185,7 +176,7 @@ def LoggedIn_Clicked(email_id, password):
         
 def signup_clicked(email, name, address ,phnumber,sign_password):
     try :
-        if signup(email, name, address ,phnumber,sign_password):
+        if userdata.signup(email, name, address ,phnumber,sign_password):
             st.success("Signup successful ")
     except:
         st.warning('Invalid User ID or user ID already taken')

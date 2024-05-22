@@ -1,15 +1,20 @@
 import mysql.connector
 import itertools
-
-db = mysql.connector.connect(
-    host='localhost',
-    user='root',
-    password='cdac',
-    database="books"
+import streamlit as st 
+def connect_to_database():
+  try:
+    db = mysql.connector.connect(
+        host='localhost',
+        user='root',
+        password='cdac',
+        database="books"
 )
-
+    return db
+  except mysql.connector.Error as err:
+    print("Error connecting to database:", err)
+    return None
+db=connect_to_database()
 bk = db.cursor() 
-
 def login(email, password):
     bk.execute(f"SELECT password FROM users WHERE email = '{email}'")
     detail = bk.fetchall()
@@ -23,6 +28,22 @@ def login(email, password):
     except:
         return False
     
+def get_books_from_db():
+    db=connect_to_database() 
+    if db:
+        try:
+            bk = db.cursor()
+        
+            bk.execute("SELECT title, author, price FROM book")
+            books = bk.fetchall()
+            return books
+        except mysql.connector.Error as err:
+            st.error(f"Error: {err}")
+        # return []
+        finally:
+            bk.close()
+    else:
+        return None
     
 def signup(email, name, address ,phnumber,sign_password):
     pz = ''
