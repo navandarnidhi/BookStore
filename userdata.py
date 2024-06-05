@@ -7,7 +7,7 @@ def connect_to_database():
         host='localhost',
         user='root',
         password='cdac',
-        database="books"
+        database="books_db"
 )
     return db
   except mysql.connector.Error as err:
